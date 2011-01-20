@@ -6,6 +6,7 @@ import android.widget.TextView;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.os.CountDownTimer;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -19,6 +20,25 @@ public class BandCamp extends Activity
 
     private final static char digits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
+    private class TenSeconds extends CountDownTimer
+    {
+        private BandCamp target = null;
+        /* progress timer */
+
+        public void onTick(long millisUntilFinished) {
+            /* TODO update progress timer */
+        }
+
+        public void onFinish() {
+            target.refresh();
+        }
+
+        public TenSeconds(BandCamp target) {
+            super(10000 - (new Date().getTime() % 10000), 1000);
+            this.target = target;
+        }
+    }
+
     private static StringBuilder byteArrayToHex(StringBuilder destination, byte[] source) {
         destination.ensureCapacity(destination.length() + 2 * source.length);
         for(int i = 0; i < source.length; ++i) {
@@ -29,6 +49,10 @@ public class BandCamp extends Activity
             destination.append(c2);
         }
         return destination;
+    }
+
+    public void refresh() {
+        setCode(calculate());
     }
 
     private String calculate() {
@@ -50,6 +74,7 @@ public class BandCamp extends Activity
     }
 
     TextView codeView;
+    TenSeconds timer;
 
     /** Called when the activity is first created. */
     @Override
@@ -57,11 +82,13 @@ public class BandCamp extends Activity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
         codeView = (TextView) findViewById(R.id.code);
-        setCode(calculate());
+        refresh();
     }
 
     private void setCode(String code) {
         codeView.setText(code);
+        timer = new TenSeconds(this);
+        timer.start();
     }
 
     @Override
