@@ -3,6 +3,9 @@ package org.tlrmx.otp;
 import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -59,6 +62,31 @@ public class BandCamp extends Activity
 
     private void setCode(String code) {
         codeView.setText(code);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.options, menu);
+        return true;
+    }
+
+    /* this should change the secret */
+    private void reset() {
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+        case R.id.reset:
+            reset();
+            return true;
+        case R.id.quit:
+            finish();
+            return true;
+        default:
+            return super.onOptionsItemSelected(item);
+        }
     }
 }
 
