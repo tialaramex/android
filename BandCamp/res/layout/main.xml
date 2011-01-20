@@ -10,8 +10,9 @@ android:padding="3dip" />
 <TextView  
     android:layout_width="fill_parent" 
     android:layout_height="wrap_content" 
-    android:text="This one time"
-    android:textSize="40sp"
+    android:gravity="right"
+    android:text="This one time..."
+    android:textSize="30sp"
     android:textColor="#00FF00"
     android:padding="3dip" />
     />
