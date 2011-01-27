@@ -7,7 +7,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.os.CountDownTimer;
+import android.content.Context;
 
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Date;
@@ -15,8 +19,11 @@ import java.util.Date;
 /** This One Time ... */
 public class BandCamp extends Activity
 {
-    private String secret = "replacewithyours";
+    private byte[] secret;
     private String pin = "1111";
+
+    /* technically it isn't the filename which is secret but its contents */
+    private static String SECRET_FILENAME = "hannigan";
 
     private final static char digits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
@@ -51,6 +58,27 @@ public class BandCamp extends Activity
         return destination;
     }
 
+    private void save(String code) {
+        try {
+            FileOutputStream fos = openFileOutput(SECRET_FILENAME, Context.MODE_PRIVATE);
+            fos.write(code.getBytes());
+            fos.close();
+        } catch (IOException x) {
+            /* ignore */
+        }
+    }
+
+    private void load() {
+        secret = "0123456789012345".getBytes(); /* FIXME initialise more sensibly */
+        try {
+            FileInputStream fis = openFileInput(SECRET_FILENAME);
+            fis.read(secret, 0, 16);
+            fis.close();
+        } catch (IOException x) {
+            /* ignore */
+        }
+    }
+
     public void refresh() {
         setCode(calculate());
     }
@@ -58,7 +86,7 @@ public class BandCamp extends Activity
     private String calculate() {
         Date now = new Date();
         long deciseconds = now.getTime() / 10000;
-        String mush = "" + deciseconds + secret + pin;
+        String time = "" + deciseconds;
 
         MessageDigest md5;
         try {
@@ -67,7 +95,9 @@ public class BandCamp extends Activity
             throw new RuntimeException("Missing MD5 hash implementation", e);
         }
 
-        md5.update(mush.getBytes());
+        md5.update(time.getBytes());
+        md5.update(secret);
+        md5.update(pin.getBytes());
         StringBuilder output = byteArrayToHex(new StringBuilder(), md5.digest());
         
         return output.toString().substring(0, 6);
@@ -81,6 +111,7 @@ public class BandCamp extends Activity
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        load();
         codeView = (TextView) findViewById(R.id.code);
         refresh();
     }
