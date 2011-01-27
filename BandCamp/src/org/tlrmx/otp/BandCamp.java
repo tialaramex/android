@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Date;
 
 /** This One Time ... */
@@ -21,6 +22,8 @@ public class BandCamp extends Activity
 {
     private byte[] secret;
     private String pin = "1111";
+
+    private SecureRandom sr = new SecureRandom();
 
     /* technically it isn't the filename which is secret but its contents */
     private static String SECRET_FILENAME = "hannigan";
@@ -69,7 +72,7 @@ public class BandCamp extends Activity
     }
 
     private void load() {
-        secret = "0123456789012345".getBytes(); /* FIXME initialise more sensibly */
+        secret = "0123456789abcdef".getBytes(); /* actually this is an acceptable default */
         try {
             FileInputStream fis = openFileInput(SECRET_FILENAME);
             fis.read(secret, 0, 16);
@@ -129,8 +132,14 @@ public class BandCamp extends Activity
         return true;
     }
 
-    /* this should change the secret */
     private void reset() {
+        byte[] bytes = new byte[8];
+        sr.nextBytes(bytes);
+        String newSecret = byteArrayToHex(new StringBuilder(), bytes).toString();
+        /* should also display this to the user ... */
+        save(newSecret);
+        secret = newSecret.getBytes();
+        refresh();
     }
 
     @Override
