@@ -9,9 +9,16 @@ import android.widget.Toast;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.ViewGroup;
 import android.os.CountDownTimer;
 import android.content.Context;
 import android.content.DialogInterface;
+
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+import android.graphics.Rect;
 
 import java.io.FileOutputStream;
 import java.io.FileInputStream;
@@ -43,15 +50,17 @@ public class BandCamp extends Activity
         /* progress timer */
 
         public void onTick(long millisUntilFinished) {
-            /* TODO update progress timer */
+            /* use 110% here, so there's a moment of "hang" which feels better */
+            target.cdView.setFraction( 1.1f - ((float) millisUntilFinished) / 10000.0f);
         }
 
         public void onFinish() {
+            target.cdView.setFraction(1.0f);
             target.refresh();
         }
 
         public TenSeconds(BandCamp target) {
-            super(10000 - (new Date().getTime() % 10000), 1000);
+            super(10000 - (new Date().getTime() % 10000), 500);
             this.target = target;
         }
     }
@@ -114,6 +123,7 @@ public class BandCamp extends Activity
     }
 
     TextView codeView;
+    CountdownView cdView;
     TenSeconds timer;
 
     /** Called when the activity is first created. */
@@ -123,6 +133,9 @@ public class BandCamp extends Activity
         setContentView(R.layout.main);
         load();
         codeView = (TextView) findViewById(R.id.code);
+        cdView = new CountdownView(this);
+        ViewGroup group = (ViewGroup) findViewById(R.id.group);
+        group.addView(cdView);
         refresh();
     }
 
@@ -187,6 +200,36 @@ public class BandCamp extends Activity
             return true;
         default:
             return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private class CountdownView extends View {
+        public CountdownView(Context context) {
+            super(context);
+        }
+
+        float fraction = 0.0f;
+
+        public void setFraction(float fraction) {
+            if (fraction < 0.0f) {
+                this.fraction = 0.0f;
+            } else if (fraction > 1.0f) {
+                this.fraction = 1.0f;
+            } else {
+                this.fraction = fraction;
+            }
+            invalidate();
+        }
+
+        @Override protected void onDraw(Canvas canvas) {
+            super.onDraw(canvas);
+
+            Paint paint = new Paint();
+            paint.setStyle(Paint.Style.FILL);
+            paint.setColor(Color.GRAY);
+            canvas.drawRect(85, 5, 245, 35, paint);
+            paint.setColor(Color.RED);
+            canvas.drawRect(90, 10, 90 + (int) (150.0 * fraction) , 30, paint);
         }
     }
 }
