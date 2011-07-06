@@ -44,14 +44,15 @@ public class BandCamp extends Activity
 
     private final static char digits[] = { '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f' };
 
-    private class TenSeconds extends CountDownTimer
+    /** now a 30 second timer */
+    private class CodeDisplayTimer extends CountDownTimer
     {
         private BandCamp target = null;
         /* progress timer */
 
         public void onTick(long millisUntilFinished) {
             /* use 110% here, so there's a moment of "hang" which feels better */
-            target.cdView.setFraction( 1.1f - ((float) millisUntilFinished) / 10000.0f);
+            target.cdView.setFraction( 1.1f - ((float) millisUntilFinished) / 30000.0f);
         }
 
         public void onFinish() {
@@ -59,8 +60,8 @@ public class BandCamp extends Activity
             target.refresh();
         }
 
-        public TenSeconds(BandCamp target) {
-            super(10000 - (new Date().getTime() % 10000), 500);
+        public CodeDisplayTimer(BandCamp target) {
+            super(30000 - (new Date().getTime() % 10000), 500);
             this.target = target;
         }
     }
@@ -102,6 +103,7 @@ public class BandCamp extends Activity
         setCode(calculate());
     }
 
+    /** this precise calculation is needed for mOTP */
     private String calculate() {
         Date now = new Date();
         long deciseconds = now.getTime() / 10000;
@@ -124,7 +126,7 @@ public class BandCamp extends Activity
 
     TextView codeView;
     CountdownView cdView;
-    TenSeconds timer;
+    CodeDisplayTimer timer;
 
     /** Called when the activity is first created. */
     @Override
@@ -141,7 +143,7 @@ public class BandCamp extends Activity
 
     private void setCode(String code) {
         codeView.setText(code);
-        timer = new TenSeconds(this);
+        timer = new CodeDisplayTimer(this);
         timer.start();
     }
 
