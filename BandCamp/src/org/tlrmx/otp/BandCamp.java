@@ -143,6 +143,9 @@ public class BandCamp extends Activity
 
     private void setCode(String code) {
         codeView.setText(code);
+        if (timer != null) {
+            timer.cancel();
+        }
         timer = new CodeDisplayTimer(this);
         timer.start();
     }
